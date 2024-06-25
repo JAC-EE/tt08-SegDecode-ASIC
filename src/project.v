@@ -38,14 +38,6 @@ module tt_um_JAC_EE_segdecode(
   assign KeyPlxr = ui_in[7:4]; //Keypad collumns
   assign uo_out[6:0] = Out7S;
   assign uio_out[3:0] = ScreenSel;
-  
-  //Net type
- /* wire SCK, MOSI, EN, RESET, MISO;
-  wire [3:0] KeyPlxr, ScreenSel;
-  wire [6:0] Out7S;
-  reg    [7:0] dIN, dOUT;			//8 bit SPI buffer
-  reg		  	 RESET_int;			//Reset buffer to hold CPLD in reset when ISP*/
-  
 
   // List all unused inputs to prevent warnings
   wire _unused = &{ena, clk, rst_n, 1'b0};
@@ -54,11 +46,11 @@ module tt_um_JAC_EE_segdecode(
   //////////////////////////////////////
   integer i; 							    //Used for generating shift register
  	// Multiplexer logic
-	wire MUX = ~((~dOUT[7]  & ~dOUT[6]  &  KeyPlxr[0]) 
+	assign MISO = ~((~dOUT[7]  & ~dOUT[6]  &  KeyPlxr[0]) 
 				  | (~dOUT[7]  &  dOUT[6]  &  KeyPlxr[1]) 
 				  | ( dOUT[7]  &  dOUT[6]  &  KeyPlxr[3]) 
 				  | ( dOUT[7]  & ~dOUT[6]  &  KeyPlxr[2]));
-	assign MISO = RESET_int ? 1'bZ : MUX; //Used to set MISO to High Z to prevent collisions during ATMega32a ISP WARNING WILL LIKELY CAUSE ISSUES IN ASIC!!!!!!!!!!
+	//assign MISO = RESET_int ? 1'bZ : MUX; //Used to set MISO to High Z to prevent collisions during ATMega32a ISP WARNING WILL LIKELY CAUSE ISSUES IN ASIC!!!!!!!!!!
 
 	// Screen selection logic - Walking 0
 	assign ScreenSel[0] =  dOUT[5]  |  dOUT[4];	//00
