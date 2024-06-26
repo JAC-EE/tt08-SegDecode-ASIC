@@ -24,7 +24,7 @@ module tb ();
   wire [7:0] uio_oe;
   
   // DEBUG
-  wire [7:0] dIN, dOUT;
+  //wire [7:0] dIN, dOUT;
 
   // Replace tt_um_example with your module name:
   tt_um_JAC_EE_segdecode user_project (
@@ -44,8 +44,8 @@ module tb ();
       .clk    (clk),      // clock
       .rst_n  (rst_n)     // not reset
 	  // Internal DEBUG
-	  ,.dIN	  (dIN), 	  //DATA in
-	  .dOUT	  (dOUT)	  //DATA out
+	  //,.dIN	  (dIN), 	  //DATA in
+	  //.dOUT	  (dOUT)	  //DATA out
   );
 
 endmodule

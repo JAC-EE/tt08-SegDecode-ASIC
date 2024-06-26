@@ -16,7 +16,7 @@ module tt_um_JAC_EE_segdecode(
     input  wire       rst_n     // reset_n - low to reset
 	
 	//DEBUG
-	,output reg  [7:0] dIN, dOUT			//8 bit SPI buffer
+	//,output reg  [7:0] dIN, dOUT			//8 bit SPI buffer
 );
 
   //Net type
@@ -24,7 +24,7 @@ module tt_um_JAC_EE_segdecode(
   wire [3:0] KeyPlxr, ScreenSel;
   wire [6:0] Out7S;
   wire 		 HIGH_Z;			//Output used as high impedance input for external tri-state buffer
-  //reg  [7:0] dIN, dOUT;			//8 bit SPI buffer
+  reg  [7:0] dIN, dOUT;			//8 bit SPI buffer
   reg		 RESET_int;			//Reset buffer to hold CPLD in reset when ISP
 
   // All output pins must be assigned. If not used, assign to 0.
