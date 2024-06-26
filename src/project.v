@@ -14,33 +14,40 @@ module tt_um_JAC_EE_segdecode(
     input  wire       ena,      // always 1 when the design is powered, so you can ignore it
     input  wire       clk,      // clock
     input  wire       rst_n     // reset_n - low to reset
+	
+	//DEBUG
+	,output reg  [7:0] dIN, dOUT			//8 bit SPI buffer
 );
 
   //Net type
   wire SCK, MOSI, EN, RESET, MISO;
   wire [3:0] KeyPlxr, ScreenSel;
   wire [6:0] Out7S;
-  reg    [7:0] dIN, dOUT;			//8 bit SPI buffer
-  reg		  	 RESET_int;			//Reset buffer to hold CPLD in reset when ISP
+  wire 		 HIGH_Z;			//Output used as high impedance input for external tri-state buffer
+  //reg  [7:0] dIN, dOUT;			//8 bit SPI buffer
+  reg		 RESET_int;			//Reset buffer to hold CPLD in reset when ISP
 
   // All output pins must be assigned. If not used, assign to 0.
   //assign uo_out  = ui_in + uio_in;  // Example: ou_out is the sum of ui_in and uio_in
   assign uio_out[7:4] = 0;
-  assign uio_oe  = 1; //IOs used only as outputs
+  assign uio_oe  = 8'hFF; //IOs used only as outputs
   
-  //SPI
-  assign SCK = ui_in[0];
-  assign MOSI = ui_in[1];
-  assign EN = ui_in[2];
-  assign RESET = ui_in[3];
+  //SPIs
+  assign SCK   = clk;
+  //assign SCK   = ui_in[0]; //!! Check: should be clk?
+  assign MOSI  = ui_in[1];
+  assign EN    = ui_in[2];
+  assign RESET = rst_n; //!! Check what this pin is allowed to be used for
+  //assign RESET = ui_in[3]; //!! Check: should be rst_n?
   assign uo_out[7] = MISO;
   
-  assign KeyPlxr = ui_in[7:4]; //Keypad collumns
-  assign uo_out[6:0] = Out7S;
+  assign KeyPlxr      = ui_in[7:4]; //Keypad collumns
+  assign uo_out[6:0]  = Out7S;
   assign uio_out[3:0] = ScreenSel;
+  assign uio_out[4]	  = HIGH_Z;
 
   // List all unused inputs to prevent warnings
-  wire _unused = &{ena, clk, rst_n, 1'b0};
+  wire _unused = &{ena, /*clk, rst_n,*/ uio_in, 1'b0};
   
   
   //////////////////////////////////////
@@ -50,6 +57,7 @@ module tt_um_JAC_EE_segdecode(
 				  | (~dOUT[7]  &  dOUT[6]  &  KeyPlxr[1]) 
 				  | ( dOUT[7]  &  dOUT[6]  &  KeyPlxr[3]) 
 				  | ( dOUT[7]  & ~dOUT[6]  &  KeyPlxr[2]));
+	assign HIGH_Z = RESET_int; //Used to set MISO to High Z to prevent collisions during ATMega32a ISP
 	//assign MISO = RESET_int ? 1'bZ : MUX; //Used to set MISO to High Z to prevent collisions during ATMega32a ISP WARNING WILL LIKELY CAUSE ISSUES IN ASIC!!!!!!!!!!
 
 	// Screen selection logic - Walking 0
