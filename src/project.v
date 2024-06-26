@@ -23,7 +23,7 @@ module tt_um_JAC_EE_segdecode(
   wire SCK, MOSI, EN, RESET, MISO;
   wire [3:0] KeyPlxr, ScreenSel;
   wire [6:0] Out7S;
-  wire 		 HIGH_Z;			//Output used as high impedance input for external tri-state buffer
+  //wire 		 HIGH_Z;			//Output used as high impedance input for external tri-state buffer
   reg  [7:0] dIN, dOUT;			//8 bit SPI buffer
   reg		 RESET_int;			//Reset buffer to hold CPLD in reset when ISP
 
@@ -44,7 +44,7 @@ module tt_um_JAC_EE_segdecode(
   assign KeyPlxr      = ui_in[7:4]; //Keypad collumns
   assign uo_out[6:0]  = Out7S;
   assign uio_out[3:0] = ScreenSel;
-  assign uio_out[4]	  = RESET_int; //Used to set MISO to High Z to prevent collisions during ATMega32a ISP
+  assign uio_out[4]	  = ~RESET; //Used to set MISO to High Z to prevent collisions during ATMega32a ISP
 
   // List all unused inputs to prevent warnings
   wire _unused = &{ena, /*clk, rst_n,*/ uio_in, ui_in[3:0], 1'b0};
@@ -75,13 +75,8 @@ module tt_um_JAC_EE_segdecode(
 	/*F*/assign Out7S[1] = ~EN | (~(((dOUT[3] | dOUT[2]) | (~dOUT[1] & ~dOUT[0])) & (dOUT[3] | ~dOUT[1] | ~dOUT[0])));
 	/*G*/assign Out7S[0] = ~EN | (~((dOUT[3] | dOUT[2] | dOUT[1]) & (dOUT[3] | ~dOUT[2] | ~dOUT[1] | ~dOUT[0])));
 
-	always @(posedge SCK or negedge RESET) begin//SPI clock in
-	//Reset procedure. Used for allowing in system programming of other chips. Not vital to final function
-		if (~RESET) begin
-			RESET_int <= ~RESET; //Sets reset
-		end 
-		else if (EN) begin
-			RESET_int <= ~RESET; //Disables reset
+	always @(posedge SCK) begin//SPI clock in
+		if (EN) begin
 			//Generate D shift register - Telling synthesiser to copy this Verilog over and over.
 				dIN[0] <= MOSI;
 			for (i = 0; i < 7; i = i + 1) begin
