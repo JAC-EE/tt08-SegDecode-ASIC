@@ -29,7 +29,7 @@ module tt_um_JAC_EE_segdecode(
 
   // All output pins must be assigned. If not used, assign to 0.
   //assign uo_out  = ui_in + uio_in;  // Example: ou_out is the sum of ui_in and uio_in
-  assign uio_out[7:4] = 0;
+  assign uio_out[7:5] = 0;
   assign uio_oe  = 8'hFF; //IOs used only as outputs
   
   //SPIs
@@ -44,10 +44,10 @@ module tt_um_JAC_EE_segdecode(
   assign KeyPlxr      = ui_in[7:4]; //Keypad collumns
   assign uo_out[6:0]  = Out7S;
   assign uio_out[3:0] = ScreenSel;
-  assign uio_out[4]	  = HIGH_Z;
+  assign uio_out[4]	  = RESET_int; //Used to set MISO to High Z to prevent collisions during ATMega32a ISP
 
   // List all unused inputs to prevent warnings
-  wire _unused = &{ena, /*clk, rst_n,*/ uio_in, 1'b0};
+  wire _unused = &{ena, /*clk, rst_n,*/ uio_in, ui_in[3:0], 1'b0};
   
   
   //////////////////////////////////////
@@ -57,7 +57,7 @@ module tt_um_JAC_EE_segdecode(
 				  | (~dOUT[7]  &  dOUT[6]  &  KeyPlxr[1]) 
 				  | ( dOUT[7]  &  dOUT[6]  &  KeyPlxr[3]) 
 				  | ( dOUT[7]  & ~dOUT[6]  &  KeyPlxr[2]));
-	assign HIGH_Z = RESET_int; //Used to set MISO to High Z to prevent collisions during ATMega32a ISP
+	//assign HIGH_Z = RESET_int; //Used to set MISO to High Z to prevent collisions during ATMega32a ISP
 	//assign MISO = RESET_int ? 1'bZ : MUX; //Used to set MISO to High Z to prevent collisions during ATMega32a ISP WARNING WILL LIKELY CAUSE ISSUES IN ASIC!!!!!!!!!!
 
 	// Screen selection logic - Walking 0
