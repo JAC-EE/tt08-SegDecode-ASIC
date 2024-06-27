@@ -37,7 +37,7 @@ module tt_um_JAC_EE_segdecode(
   //assign SCK   = ui_in[0]; //!! Check: should be clk?
   assign MOSI  = ui_in[1];
   assign EN    = ui_in[2];
-  assign RESET = rst_n; //!! Check what this pin is allowed to be used for
+  //assign RESET = rst_n; //!! Check what this pin is allowed to be used for
   //assign RESET = ui_in[3]; //!! Check: should be rst_n?
   assign uo_out[7] = MISO;
   
@@ -47,7 +47,7 @@ module tt_um_JAC_EE_segdecode(
   assign uio_out[4]	  = ~EN; //Used to set MISO to High Z to prevent collisions during ATMega32a ISP
 
   // List all unused inputs to prevent warnings
-  wire _unused = &{ena, /*clk, rst_n,*/ uio_in, ui_in[3:0], 1'b0};
+  wire _unused = &{ena, /*clk,*/ rst_n, uio_in, ui_in[3:0], 1'b0};
   
   
   //////////////////////////////////////
