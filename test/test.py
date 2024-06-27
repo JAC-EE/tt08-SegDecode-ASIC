@@ -62,6 +62,8 @@ async def test_project(dut):
     
     await ClockCycles(dut.clk, 1)
     
+    errors = 0
+    
     for input_value, expected_output in seven_segment_anode:
         # Initial tests
         i = input_value
@@ -74,10 +76,20 @@ async def test_project(dut):
         await ClockCycles(dut.clk, 1)
         dut.ui_in.value = int(dut.ui_in.value) | 0x4 # SPI enable
         await ClockCycles(dut.clk, 1)
-        assert dut.uo_out.value & 0x7F == seven_segment_anode[i][1], f"7 Segment result incorrect: {dut.uo_out.value}" #7 Segment test
-        dut.ui_in.value = 0 # int(dut.ui_in.value) & ~0x4 # SPI disable
+        try:
+            assert dut.uo_out.value & 0x7F == seven_segment_anode[i][1], f"7 Segment result incorrect: Was: {hex(dut.uo_out.value & 0x7F)} Should be: {hex(seven_segment_anode[i][1])}" #7 Segment test
+        except AssertionError as e:
+            dut._log.error(str(e))
+            errors += 1
+        dut.ui_in.value = int(dut.ui_in.value) & ~0x4 # SPI disable
         await ClockCycles(dut.clk, 1)
     #END
+    
+    if errors:
+        dut._log.error(f"{errors} test cases failed")
+        assert 0,  f"Testbench encountered errors. Test failed."
+    else:
+        dut._log.info("All test cases passed")
     
     #dut.rst_n.value = 0
 
