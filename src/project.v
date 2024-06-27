@@ -20,7 +20,7 @@ module tt_um_JAC_EE_segdecode(
 );
 
   //Net type
-  wire SCK, MOSI, EN, RESET, MISO;
+  wire SCK, MOSI, EN, /*RESET,*/ MISO;
   wire [3:0] KeyPlxr, ScreenSel;
   wire [6:0] Out7S;
   //wire 		 HIGH_Z;			//Output used as high impedance input for external tri-state buffer

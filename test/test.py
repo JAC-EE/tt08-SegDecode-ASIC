@@ -26,8 +26,8 @@ def read_test_values(filename):
 # Sends DATA of a specific LENGTH through spi. MOSI pin is selected by providing a MASK for ui_in
 # MSB first
 async def SPI_send(dut, DATA: int, LENGTH: int, MASK: int):
-    # Set the clock period to 10 us (100 KHz)
-    clock = Clock(dut.clk, 10, units="us")
+    # Set the clock period to 100 us (10 KHz)
+    clock = Clock(dut.clk, 100, units="us")
     cocotb.start_soon(clock.start())
     # Send SPI data
     for i in range(LENGTH):
