@@ -11,6 +11,9 @@ from cocotb.triggers import ClockCycles
 from cocotb.triggers import Timer
 import csv
 
+# Set the clock period to 1000 us (1 KHz)
+clock_period = 1000
+
 # Load csv file
 def read_test_values(filename):
     test_values = []
@@ -26,8 +29,8 @@ def read_test_values(filename):
 # Sends DATA of a specific LENGTH through spi. MOSI pin is selected by providing a MASK for ui_in
 # MSB first
 async def SPI_send(dut, DATA: int, LENGTH: int, MASK: int):
-    # Set the clock period to 100 us (10 KHz)
-    clock = Clock(dut.clk, 10, units="us")
+    # Set the clock period
+    clock = Clock(dut.clk, clock_period, units="us")
     cocotb.start_soon(clock.start())
     # Send SPI data
     for i in range(LENGTH):
@@ -47,8 +50,8 @@ async def test_project(dut):
     # Load test values from CSV file
     seven_segment_anode = read_test_values('7_segment_anode.csv')
 
-    # Set the clock period to 1000 us (1 KHz)
-    clock = Clock(dut.clk, 1000, units="us")
+    # Set the clock period
+    clock = Clock(dut.clk, clock_period, units="us")
     cocotb.start_soon(clock.start())
 
     # Reset
