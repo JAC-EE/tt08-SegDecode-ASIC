@@ -27,7 +27,7 @@ def read_test_values(filename):
 # MSB first
 async def SPI_send(dut, DATA: int, LENGTH: int, MASK: int):
     # Set the clock period to 100 us (10 KHz)
-    clock = Clock(dut.clk, 100, units="us")
+    clock = Clock(dut.clk, 10, units="us")
     cocotb.start_soon(clock.start())
     # Send SPI data
     for i in range(LENGTH):
