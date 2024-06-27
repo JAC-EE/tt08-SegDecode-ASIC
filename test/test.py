@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # ToDo:
+# Fix bit setting in SPI_send
 # Implement testing for screensel, keyplxr, and miso
 # 7 segment testing is functional
 
@@ -30,8 +31,8 @@ def read_test_values(filename):
 # MSB first
 async def SPI_send(dut, DATA: int, LENGTH: int, MASK: int):
     # Set the clock period
-    clock = Clock(dut.clk, clock_period, units="us")
-    cocotb.start_soon(clock.start())
+    #clock = Clock(dut.clk, clock_period, units="us")
+    #cocotb.start_soon(clock.start())
     # Send SPI data
     for i in range(LENGTH):
         dut._log.info(f"SPI send: {i}")
@@ -41,7 +42,9 @@ async def SPI_send(dut, DATA: int, LENGTH: int, MASK: int):
         else:
             dut.ui_in.value = 0x4#int(dut.ui_in.value) & ~MASK #clear bit
             dut._log.info(f"DATA: 0")
-        await ClockCycles(dut.clk, 1)
+        #await ClockCycles(dut.clk, 1)
+        await Timer(clock_period, units='us') 
+    dut.ui_in.value = 4#int(dut.ui_in.value) & ~MASK #clear bit
 
 @cocotb.test()
 async def test_project(dut):
@@ -63,29 +66,35 @@ async def test_project(dut):
     
     dut._log.info("Test project behavior")
     
-    await ClockCycles(dut.clk, 1)
+    #await ClockCycles(dut.clk, 1)
+    await Timer(750, units='us') # Put serial system 1/4 clock cycles ahead. Simulates similar setup and hold times
     
     errors = 0
     
     for input_value, expected_output in seven_segment_anode:
         # Initial tests
         i = input_value
-        await ClockCycles(dut.clk, 1)
+        #await ClockCycles(dut.clk, 1)
+        await Timer(clock_period, units='us') 
         dut._log.info(f"Test: {i}")
         dut.ui_in.value = int(dut.ui_in.value) | 0x4 # SPI enable
-        await ClockCycles(dut.clk, 1)
+        #await ClockCycles(dut.clk, 1)
+        await Timer(clock_period, units='us') 
         await SPI_send(dut, i, 8, 2) #send loop iteration, 8 bits, bit mask 0000 0010
         dut.ui_in.value = int(dut.ui_in.value) & ~0x4 # SPI disable
-        await ClockCycles(dut.clk, 1)
+        #await ClockCycles(dut.clk, 1)
+        await Timer(clock_period, units='us') 
         dut.ui_in.value = int(dut.ui_in.value) | 0x4 # SPI enable
-        await ClockCycles(dut.clk, 1)
+        #await ClockCycles(dut.clk, 1)
+        await Timer(clock_period, units='us') 
         try:
             assert dut.uo_out.value & 0x7F == seven_segment_anode[i][1], f"7 Segment result incorrect: Was: {hex(dut.uo_out.value & 0x7F)} Should be: {hex(seven_segment_anode[i][1])}" #7 Segment test
         except AssertionError as e:
             dut._log.error(str(e))
             errors += 1
         dut.ui_in.value = int(dut.ui_in.value) & ~0x4 # SPI disable
-        await ClockCycles(dut.clk, 1)
+        #await ClockCycles(dut.clk, 1)
+        await Timer(clock_period, units='us') 
     #END
     
     if errors:
