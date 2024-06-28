@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # ToDo:
-# Fix bit setting in SPI_send
+# COMPLETE Fix bit setting in SPI_send
 # Implement testing for screensel, keyplxr, and miso
 # 7 segment testing is functional
 
@@ -34,13 +34,14 @@ async def SPI_send(dut, DATA: int, LENGTH: int, MASK: int):
     #clock = Clock(dut.clk, clock_period, units="us")
     #cocotb.start_soon(clock.start())
     # Send SPI data
+    dut._log.info(f"SPI send: {bin(DATA)}")
     for i in range(LENGTH):
-        dut._log.info(f"SPI send: {i}")
+        #dut._log.info(f"SPI send: {i}")
         if (DATA << i) & 0x80 == 0x80: # Check if highest bit is set
-            dut.ui_in.value = 0x6#int(dut.ui_in.value) | MASK # SPI enable
+            dut.ui_in.value = int(dut.ui_in.value) | int(MASK) # SPI enable 0x6
             dut._log.info(f"DATA: 1")
         else:
-            dut.ui_in.value = 0x4#int(dut.ui_in.value) & ~MASK #clear bit
+            dut.ui_in.value = int(dut.ui_in.value) & ~int(MASK) #clear bit 0x4
             dut._log.info(f"DATA: 0")
         #await ClockCycles(dut.clk, 1)
         await Timer(clock_period, units='us') 
@@ -52,6 +53,7 @@ async def test_project(dut):
     
     # Load test values from CSV file
     seven_segment_anode = read_test_values('7_segment_anode.csv')
+    screenselect_test = read_test_values('screenselect.csv')
 
     # Set the clock period
     clock = Clock(dut.clk, clock_period, units="us")
@@ -72,7 +74,7 @@ async def test_project(dut):
     errors = 0
     
     for input_value, expected_output in seven_segment_anode:
-        # Initial tests
+        # Test 7 Segment display logic
         i = input_value
         #await ClockCycles(dut.clk, 1)
         await Timer(clock_period, units='us') 
@@ -80,9 +82,11 @@ async def test_project(dut):
         dut.ui_in.value = int(dut.ui_in.value) | 0x4 # SPI enable
         #await ClockCycles(dut.clk, 1)
         await Timer(clock_period, units='us') 
-        await SPI_send(dut, i, 8, 2) #send loop iteration, 8 bits, bit mask 0000 0010
+        await SPI_send(dut, screenselect_test[i][0] | i, 8, 2) #send loop iteration, 8 bits, bit mask 0000 0010
+        dut._log.info(f"SPI send: {bin(screenselect_test[i][0])}")
         dut.ui_in.value = int(dut.ui_in.value) & ~0x4 # SPI disable
         #await ClockCycles(dut.clk, 1)
+        dut.rst_n.value = 0 # Activate reset (prevents SCK functioning) DEBUG
         await Timer(clock_period, units='us') 
         dut.ui_in.value = int(dut.ui_in.value) | 0x4 # SPI enable
         #await ClockCycles(dut.clk, 1)
@@ -93,34 +97,18 @@ async def test_project(dut):
             dut._log.error(str(e))
             errors += 1
         dut.ui_in.value = int(dut.ui_in.value) & ~0x4 # SPI disable
+        dut.rst_n.value = 1 # Deactivate reset (returns SCK to functioning) DEBUG
         #await ClockCycles(dut.clk, 1)
         await Timer(clock_period, units='us') 
-    #END
+        # END 7 Segment display logic test
     
+    
+    # Check if any errors occured
     if errors:
         dut._log.error(f"{errors} test cases failed")
         assert 0,  f"Testbench encountered errors. Test failed."
     else:
         dut._log.info("All test cases passed")
-    
-    #dut.rst_n.value = 0
-
-    
-
-    # Set the input values you want to test
-   # dut.ui_in.value = 20
-    # dut.uio_in.value = 30
-   
-
-    # Wait for one clock cycle to see the output values
-    #await ClockCycles(dut.clk, 1)
-
-    # The following assersion is just an example of how to check the output values.
-    # Change it to match the actual expected output of your module:
-    #assert dut.uo_out.value == 50
-
-    # Keep testing the module by changing the input values, waiting for
-    # one or more clock cycles, and asserting the expected output values.
 
 
     # assert False, "This testbench is incomplete and needs further development."

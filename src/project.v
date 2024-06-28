@@ -33,7 +33,7 @@ module tt_um_JAC_EE_segdecode(
   assign uio_oe  = 8'hFF; //IOs used only as outputs
   
   //SPIs
-  assign SCK   = clk;
+  assign SCK   = clk & rst_n;
   //assign SCK   = ui_in[0]; //!! Check: should be clk?
   assign MOSI  = ui_in[1];
   assign EN    = ui_in[2];
