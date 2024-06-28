@@ -12,8 +12,8 @@ from cocotb.triggers import ClockCycles
 from cocotb.triggers import Timer
 import csv
 
-# Set the clock period to 1000 us (1 KHz)
-clock_period = 1000
+# Set the clock period to 10 us (100 KHz)
+clock_period = 10
 
 # Load csv file
 def read_test_values(filename):
@@ -67,7 +67,7 @@ async def test_project(dut):
     dut._log.info("Test project behavior")
     
     #await ClockCycles(dut.clk, 1)
-    await Timer(750, units='us') # Put serial system 1/4 clock cycles ahead. Simulates similar setup and hold times
+    await Timer(0.75 * clock_period, units='us') # Put serial system 1/4 clock cycles ahead. Simulates similar setup and hold times
     
     errors = 0
     
