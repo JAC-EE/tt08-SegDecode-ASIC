@@ -3,7 +3,9 @@
 
 # ToDo:
 # COMPLETE Fix bit setting in SPI_send
-# Implement testing for screensel, keyplxr, and miso
+# Implement testing for ScreenSel, keyplxr, and miso
+# Screenselect just test it against a csv
+# MISO/Keyplxr will require a bit more. Should ideally count up to F to check all combinations. 2x for MISO being on and off. Check it only works at the correct place.
 # 7 segment testing is functional
 
 import cocotb
@@ -39,10 +41,10 @@ async def SPI_send(dut, DATA: int, LENGTH: int, MASK: int):
         #dut._log.info(f"SPI send: {i}")
         if (DATA << i) & 0x80 == 0x80: # Check if highest bit is set
             dut.ui_in.value = int(dut.ui_in.value) | int(MASK) # SPI enable 0x6
-            dut._log.info(f"DATA: 1")
+            #dut._log.info(f"DATA: 1")
         else:
             dut.ui_in.value = int(dut.ui_in.value) & ~int(MASK) #clear bit 0x4
-            dut._log.info(f"DATA: 0")
+            #dut._log.info(f"DATA: 0")
         #await ClockCycles(dut.clk, 1)
         await Timer(clock_period, units='us') 
     dut.ui_in.value = 4#int(dut.ui_in.value) & ~MASK #clear bit
@@ -53,7 +55,7 @@ async def test_project(dut):
     
     # Load test values from CSV file
     seven_segment_anode = read_test_values('7_segment_anode.csv')
-    screenselect_test = read_test_values('screenselect.csv')
+    ScreenSelect_test = read_test_values('screenselect.csv')
 
     # Set the clock period
     clock = Clock(dut.clk, clock_period, units="us")
@@ -73,34 +75,46 @@ async def test_project(dut):
     
     errors = 0
     
-    for input_value, expected_output in seven_segment_anode:
-        # Test 7 Segment display logic
-        i = input_value
-        #await ClockCycles(dut.clk, 1)
-        await Timer(clock_period, units='us') 
-        dut._log.info(f"Test: {i}")
-        dut.ui_in.value = int(dut.ui_in.value) | 0x4 # SPI enable
-        #await ClockCycles(dut.clk, 1)
-        await Timer(clock_period, units='us') 
-        await SPI_send(dut, screenselect_test[i][0] | i, 8, 2) #send loop iteration, 8 bits, bit mask 0000 0010
-        dut._log.info(f"SPI send: {bin(screenselect_test[i][0])}")
-        dut.ui_in.value = int(dut.ui_in.value) & ~0x4 # SPI disable
-        #await ClockCycles(dut.clk, 1)
-        dut.rst_n.value = 0 # Activate reset (prevents SCK functioning) DEBUG
-        await Timer(clock_period, units='us') 
-        dut.ui_in.value = int(dut.ui_in.value) | 0x4 # SPI enable
-        #await ClockCycles(dut.clk, 1)
-        await Timer(clock_period, units='us') 
-        try:
-            assert dut.uo_out.value & 0x7F == seven_segment_anode[i][1], f"7 Segment result incorrect: Was: {hex(dut.uo_out.value & 0x7F)} Should be: {hex(seven_segment_anode[i][1])}" #7 Segment test
-        except AssertionError as e:
-            dut._log.error(str(e))
-            errors += 1
-        dut.ui_in.value = int(dut.ui_in.value) & ~0x4 # SPI disable
-        dut.rst_n.value = 1 # Deactivate reset (returns SCK to functioning) DEBUG
-        #await ClockCycles(dut.clk, 1)
-        await Timer(clock_period, units='us') 
-        # END 7 Segment display logic test
+    for input_value, expected_output in ScreenSelect_test:
+        c = int(input_value)>>4
+        dut._log.info(f"c: {hex(c)}")
+        for input_value, expected_output in seven_segment_anode:
+            # Send SPI
+            i = input_value
+            #await ClockCycles(dut.clk, 1)
+            await Timer(clock_period, units='us') 
+            dut._log.info(f"Test: {hex(i | (c<<4))}")
+            dut.ui_in.value = int(dut.ui_in.value) | 0x4 # SPI enable
+            #await ClockCycles(dut.clk, 1)
+            await Timer(clock_period, units='us') 
+            await SPI_send(dut, ScreenSelect_test[c][0] | i, 8, 2) #send loop iteration, 8 bits, bit mask 0000 0010
+            dut.ui_in.value = int(dut.ui_in.value) & ~0x4 # SPI disable
+            #await ClockCycles(dut.clk, 1)
+            dut.rst_n.value = 0 # Activate reset (prevents SCK functioning) DEBUG
+            await Timer(clock_period, units='us') 
+            dut.ui_in.value = int(dut.ui_in.value) | 0x4 # SPI enable
+            #await ClockCycles(dut.clk, 1)
+            await Timer(clock_period, units='us')
+            
+            # Test 7 Segment display logic
+            try:
+                assert dut.uo_out.value & 0x7F == seven_segment_anode[i][1], f"7 Segment result incorrect: Was: {hex(dut.uo_out.value & 0x7F)} Should be: {hex(seven_segment_anode[i][1])}" #7 Segment test
+            except AssertionError as e:
+                dut._log.error(str(e))
+                errors += 1
+            # END 7 Segment display logic test
+            # Test ScreenSel logic
+            try:
+                assert dut.uio_out.value & 0xF == ScreenSelect_test[c][1], f"Screen Select result incorrect: Was: {hex(dut.uio_out.value & 0xF)} Should be: {hex(ScreenSelect_test[i][1])}" #ScreenSel test
+            except AssertionError as e:
+                dut._log.error(str(e))
+                errors += 1
+            # END Screensel logic test
+            
+            dut.ui_in.value = int(dut.ui_in.value) & ~0x4 # SPI disable
+            dut.rst_n.value = 1 # Deactivate reset (returns SCK to functioning) DEBUG
+            #await ClockCycles(dut.clk, 1)
+            await Timer(clock_period, units='us') 
     
     
     # Check if any errors occured
