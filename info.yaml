@@ -2,7 +2,7 @@
 project:
   title:        "7 Segment Decode"      # Project title
   author:       "Jack Clayton"      # Your name
-  discord:      "N/A"      # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
+  discord:      "JAC-EE"      # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
   description:  "ASIC implementation of a university CPLD project which drives 4 multiplexed 7 segment displays, and scans a multiplexed keypad."      # One line description of what your project does
   language:     "Verilog" # other examples include SystemVerilog, Amaranth, VHDL, etc
   clock_hz:     5000       # Clock frequency in Hz (or 0 if not applicable)
@@ -22,14 +22,14 @@ project:
 # The pinout of your project. Leave unused pins blank. DO NOT delete or add any pins.
 pinout:
   # Inputs
-  ui[0]: "SCK"
+  ui[0]: ""
   ui[1]: "MOSI"
   ui[2]: "EN"
   ui[3]: "RESET"
-  ui[4]: "KeyPlxr[3]"
-  ui[5]: "KeyPlxr[2]"
-  ui[6]: "KeyPlxr[1]"
-  ui[7]: "KeyPlxr[0]"
+  ui[4]: "KeyPlxr[0]"
+  ui[5]: "KeyPlxr[1]"
+  ui[6]: "KeyPlxr[2]"
+  ui[7]: "KeyPlxr[3]"
 
   # Outputs
   uo[0]: "Out7S[0]"
@@ -46,7 +46,7 @@ pinout:
   uio[1]: "ScreenSel[1]"
   uio[2]: "ScreenSel[2]"
   uio[3]: "ScreenSel[3]"
-  uio[4]: ""
+  uio[4]: "High-Z"
   uio[5]: ""
   uio[6]: ""
   uio[7]: ""
