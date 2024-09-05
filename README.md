@@ -19,13 +19,13 @@ The serial protocol implemented in this design consists of a simple single byte 
 Data is sent Most Significant Bit (MSB) first.
 
 
-![SPI Protocol visual bit representations](./images/2.2.0.1_bit_representations.png)
+![SPI Protocol visual bit representations](docs/images/2.2.0.1_bit_representations.png)
 
-![SPI Protocol bit definitions](./images/2.2.0.2_bit_definitions.png)
+![SPI Protocol bit definitions](docs/images/2.2.0.2_bit_definitions.png)
 
-![SPI example byte 0xD7](./images/2.2.0.3_example_byte.png)
+![SPI example byte 0xD7](docs/images/2.2.0.3_example_byte.png)
 
-![Verilog block diagram](./images/EPM7032AE_internal.png)
+![Verilog block diagram](docs/images/EPM7032AE_internal.png)
 
 The high impedance programming state is not implemented in this ASIC. It is represented as a bit out instead.
  
@@ -41,11 +41,11 @@ You may also use the MISO to implement a 4x4 keypad, which is interpreted by the
 
 Main external system schematic:
 
-![Main schematic](./images/Main.png)
+![Main schematic](docs/images/Main.png)
 
 Simple keypad:
 
-![Keypad schematic](./images/page2.png)
+![Keypad schematic](docs/images/page2.png)
 
 
 [3D View](https://gds-viewer.tinytapeout.com/?model=https://jac-ee.github.io/tt08-SegDecode-ASIC/tinytapeout.gds.gltf)
