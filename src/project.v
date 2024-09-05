@@ -24,7 +24,7 @@ module tt_um_JAC_EE_segdecode(
   wire [3:0] KeyPlxr, ScreenSel;
   wire [6:0] Out7S;
   //wire 		 HIGH_Z;			//Output used as high impedance input for external tri-state buffer
-  reg  [7:0] dIN, dOUT;			//8 bit SPI buffer
+  reg  [7:0] dIN, dOUT;		//8 bit SPI buffer
   //reg		 RESET_int;			//Reset buffer to hold CPLD in reset when ISP
 
   // All output pins must be assigned. If not used, assign to 0.
@@ -33,7 +33,7 @@ module tt_um_JAC_EE_segdecode(
   assign uio_oe  = 8'hFF; //IOs used only as outputs
   
   //SPIs
-  assign SCK   = clk; //& rst_n; rst_n make waveforms a bit easier to read. do not use in final; causes timing violations
+  assign SCK   = clk;      //& rst_n; rst_n make waveforms a bit easier to read. do not use in final; causes timing violations
   //assign SCK   = ui_in[0]; //!! Check: should be clk?
   assign MOSI  = ui_in[1];
   assign EN    = ui_in[2];
@@ -47,7 +47,7 @@ module tt_um_JAC_EE_segdecode(
   assign uio_out[4]	  = ~EN; //Used to set MISO to High Z to prevent collisions during ATMega32a ISP
 
   // List all unused inputs to prevent warnings
-  wire _unused = &{ena, /*clk,*/ rst_n, uio_in, ui_in[3:0], 1'b0};
+  wire _unused = &{ena, /*clk,*/ rst_n, uio_in, ui_in[3], ui_in[0], 1'b0};
   
   
   //////////////////////////////////////
